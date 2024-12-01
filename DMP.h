@@ -57,12 +57,13 @@ DMP::DMP(double accelerometer_pricision, double gryoscope_pricise, double megnet
     sample();
     std::vector<double> initdata = sample();
     // get data from MPU6050 to form a initial pose
-    double pitch = std::atan(initdata[1] / std::pow(initdata[0] * initdata[0] + initdata[2] * initdata[2], 0.5)), roll = std::atan(initdata[0] / std::pow(initdata[1] * initdata[1] + initdata[2] * initdata[2], 0.5));
+    double pitch = std::atan(initdata[0] / std::pow(initdata[1] * initdata[1] + initdata[2] * initdata[2], 0.5)),
+           roll = std::atan(initdata[1] / std::pow(initdata[0] * initdata[0] + initdata[2] * initdata[2], 0.5));
     Quaternion qz{1, 0, 0, 0}, qy{std::cos(pitch / 2), 0, std::sin(pitch / 2), 0}, qx{std::cos(roll / 2), std::sin(roll / 2), 0, 0};
     _last_pose = (qz * qy * qx).unitize();
-    // get data from HMC5883L to remove zero error of roll pitch yaw
-    _last_pitch = std::atan(initdata[1] / std::pow(initdata[0] * initdata[0] + initdata[2] * initdata[2], 0.5));
-    _last_roll = std::atan(initdata[0] / std::pow(initdata[1] * initdata[1] + initdata[2] * initdata[2], 0.5));
+    // get data from HMC5883L to remove zero error of yaw
+    _last_pitch = pitch;
+    _last_roll = roll;
     _last_yaw = std::atan2(initdata[8], initdata[7]);
     // get data from BMP280 to remove zero error of height
     _last_height = calcHeight(initdata[11], (initdata[6] + initdata[10]) / 2);
@@ -76,8 +77,8 @@ std::vector<double> DMP::solve(double dt)
     // setp 3: get data from BMP280
     std::vector<double> initdata = sample();
     // setp 4: calculate delta roll(accelerometer radis), delta pitch(accelerometer radis) and delta yaw(megnetometer radis) as well as delta height(barometer). These are all measured value.
-    double deltapitch = std::atan(initdata[1] / std::pow(initdata[0] * initdata[0] + initdata[2] * initdata[2], 0.5)) - _last_pitch,
-           deltaroll = std::atan(initdata[0] / std::pow(initdata[1] * initdata[1] + initdata[2] * initdata[2], 0.5)) - _last_roll,
+    double deltapitch = std::atan(initdata[0] / std::pow(initdata[1] * initdata[1] + initdata[2] * initdata[2], 0.5)) - _last_pitch,
+           deltaroll = std::atan(initdata[1] / std::pow(initdata[0] * initdata[0] + initdata[2] * initdata[2], 0.5)) - _last_roll,
            deltayaw = std::atan2(initdata[8], initdata[7]) - _last_yaw,
            deltaheight = calcHeight(initdata[11], (initdata[6] + initdata[10]) / 2) - _last_height;
     // step 5: use kalmanfilter to form filterd angles
