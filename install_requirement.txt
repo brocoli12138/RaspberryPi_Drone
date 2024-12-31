@@ -1,0 +1,6 @@
+sudo apt install -y libi2c-dev libi2c-tools libssl-dev openssl cmake
+
+cd paho.mqtt.c
+sudo make && sudo make install
+
+gcc -std=c++11 -o MQTTClient_publish MQTTClient_publish.cpp -lpaho-mqtt3cs -pthread -lssl -lcrypto
