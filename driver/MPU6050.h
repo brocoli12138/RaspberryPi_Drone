@@ -2,7 +2,7 @@
 #ifndef __MPU6050_H__
 #define __MPU6050_H__
 
-#include <fcntl.h>
+#include <fcntl.h>  
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
