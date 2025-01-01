@@ -67,6 +67,20 @@
         "xstring": "cpp",
         "xtr1common": "cpp",
         "xtree": "cpp",
-        "xutility": "cpp"
+        "xutility": "cpp",
+        "condition_variable": "cpp",
+        "coroutine": "cpp",
+        "resumable": "cpp",
+        "functional": "cpp",
+        "future": "cpp",
+        "list": "cpp",
+        "mutex": "cpp",
+        "queue": "cpp",
+        "random": "cpp",
+        "ranges": "cpp",
+        "span": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp",
+        "xhash": "cpp"
     }
 }
