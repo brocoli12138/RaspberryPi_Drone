@@ -1,6 +1,12 @@
-sudo apt install -y libi2c-dev libi2c-tools libssl-dev openssl cmake
+sudo apt-get install -y libssl-dev openssl cmake g++ git
+sudo apt-get install -y doxygen graphviz
+sudo apt-get install -y libi2c-dev libi2c-tools 
 
-cd paho.mqtt.c
-sudo make && sudo make install
+git clone https://github.com/eclipse/paho.mqtt.cpp
+cd paho.mqtt.cpp
+git submodule init
+git submodule update
+cmake -Bbuild -H. -DPAHO_WITH_MQTT_C=ON -DPAHO_BUILD_EXAMPLES=ON
+sudo cmake --build build/ --target install
 
 gcc -std=c++11 -o MQTTClient_publish MQTTClient_publish.cpp -lpaho-mqtt3cs -pthread -lssl -lcrypto
