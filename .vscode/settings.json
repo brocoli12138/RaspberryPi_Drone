@@ -81,6 +81,8 @@
         "span": "cpp",
         "stop_token": "cpp",
         "thread": "cpp",
-        "xhash": "cpp"
+        "xhash": "cpp",
+        "numeric": "cpp",
+        "cinttypes": "cpp"
     }
 }

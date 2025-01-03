@@ -1,12 +1,19 @@
-sudo apt-get install -y libssl-dev openssl cmake g++ git
+sudo apt-get install -y libssl-dev openssl cmake g++ git wget
 sudo apt-get install -y doxygen graphviz
 sudo apt-get install -y libi2c-dev libi2c-tools 
 
+https://www.emqx.com/en/downloads-and-install/broker?os=Ubuntu
+sudo wget https://www.emqx.com/en/downloads/broker/5.8.4/emqx-5.8.4-elixir-ubuntu22.04-amd64.tar.gz
+sudo mkdir -p emqx && sudo tar -zxvf emqx-5.8.4-elixir-ubuntu22.04-amd64.tar.gz -C emqx
+sudo ./emqx/bin/emqx start
+
+git config --global http.proxy "http://127.0.0.1:7890/"
+git config --global https.proxy "http://127.0.0.1:7890/"
 git clone https://github.com/eclipse/paho.mqtt.cpp
 cd paho.mqtt.cpp
 git submodule init
 git submodule update
-cmake -Bbuild -H. -DPAHO_WITH_MQTT_C=ON -DPAHO_BUILD_EXAMPLES=ON
+sudo cmake -Bbuild -H. -DPAHO_WITH_MQTT_C=ON -DPAHO_BUILD_EXAMPLES=ON
 sudo cmake --build build/ --target install
 
 g++ -std=c++11 -o async_publish async_publish.cpp -lpaho-mqttpp3 -lpaho-mqtt3a -lpthread
