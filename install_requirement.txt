@@ -1,14 +1,27 @@
-sudo apt-get install -y libssl-dev openssl cmake g++ git wget
+/*-------------pre-install software utilities-------------*/
+sudo apt-get install -y libssl-dev openssl g++ git wget
 sudo apt-get install -y doxygen graphviz
 sudo apt-get install -y libi2c-dev libi2c-tools 
+sudo apt install -y libboost-dev
+sudo apt install -y libgnutls28-dev openssl libtiff5-dev pybind11-dev
+sudo apt install -y qtbase5-dev libqt5core5a libqt5gui5 libqt5widgets5
+sudo apt install -y meson cmake
+sudo apt install -y python3-yaml python3-ply
+sudo apt install -y libglib2.0-dev libgstreamer-plugins-base1.0-dev
+sudo apt install -y cmake libboost-program-options-dev libdrm-dev libexif-dev
+sudo apt install -y ninja-build
 
+/*-------------install MQTT broker-------------*/
 https://www.emqx.com/en/downloads-and-install/broker?os=Ubuntu
 sudo wget https://www.emqx.com/en/downloads/broker/5.8.4/emqx-5.8.4-elixir-ubuntu22.04-amd64.tar.gz
 sudo mkdir -p emqx && sudo tar -zxvf emqx-5.8.4-elixir-ubuntu22.04-amd64.tar.gz -C emqx
 sudo ./emqx/bin/emqx start
 
+/*-------------set git proxy agent-------------*/
 git config --global http.proxy "http://127.0.0.1:7890/"
 git config --global https.proxy "http://127.0.0.1:7890/"
+
+/*-------------install paho mqtt api-------------*/
 git clone https://github.com/eclipse/paho.mqtt.cpp
 cd paho.mqtt.cpp
 git submodule init
@@ -16,7 +29,33 @@ git submodule update
 sudo cmake -Bbuild -H. -DPAHO_WITH_MQTT_C=ON -DPAHO_BUILD_EXAMPLES=ON
 sudo cmake --build build/ --target install
 
-g++ -std=c++11 -o async_publish async_publish.cpp -lpaho-mqttpp3 -lpaho-mqtt3a -lpthread
+/*-------------install libcamera and rpicamera-apps-------------*/
+git clone https://github.com/raspberrypi/libcamera.git
+cd libcamera
+meson setup build --buildtype=release -Dpipelines=rpi/vc4,rpi/pisp -Dipas=rpi/vc4,rpi/pisp -Dv4l2=true -Dgstreamer=enabled -Dtest=false -Dlc-compliance=disabled -Dcam=disabled -Dqcam=disabled -Ddocumentation=disabled -Dpycamera=enabled
+*******You can disable the gstreamer plugin by replacing -Dgstreamer=enabled with -Dgstreamer=disabled during the meson build configuration. If you disable gstreamer, there is no need to install the libglib2.0-dev and libgstreamer-plugins-base1.0-dev dependencies.*******
+ninja -C build
+sudo ninja -C build install
+*******On devices with 1GB of memory or less, the build may exceed available memory. Append the -j 1 flag to ninja commands to limit the build to a single process. This should prevent the build from exceeding available memory on devices like the Raspberry Pi Zero and the Raspberry Pi 3.*******
+*******libcamera does not yet have a stable binary interface. Always build rpicam-apps after you build libcamera.*******
+sudo apt install libavcodec-dev libavdevice-dev libavformat-dev libswresample-dev
+sudo apt install libpng-dev libepoxy-dev
+git clone https://github.com/raspberrypi/rpicam-apps.git
+cd rpicam-apps
+meson setup build -Denable_libav=enabled -Denable_drm=enabled -Denable_egl=enabled -Denable_qt=enabled -Denable_opencv=disabled -Denable_tflite=disabled -Denable_hailo=disabled
+*******Use -Dneon_flags=armv8-neon to enable optimisations for 32-bit OSes on Raspberry Pi 3 or Raspberry Pi 4.*******
+*******Use -Denable_opencv=enabled if you have installed OpenCV and wish to use OpenCV-based post-processing stages.*******
+*******Use -Denable_tflite=enabled if you have installed TensorFlow Lite and wish to use it in post-processing stages.*******
+*******Use -Denable_hailo=enabled if you have installed HailoRT and wish to use it in post-processing stages.*******
+meson compile -C build
+sudo meson install -C build
+sudo ldconfig
+*******Run the following command to check that your device uses the new binary:*******
+rpicam-still --version
 
+/*-------------compile and link-------------*/
+g++ -o async_publish async_publish.cpp -lpaho-mqttpp3 -lpaho-mqtt3a -lpthread
 ******If you want to communicate over an encrypted channel, please add the following compile options:******
 -lssl -lcrypto
+
+0c45:6725
