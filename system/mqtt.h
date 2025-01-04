@@ -11,10 +11,8 @@
 #include <chrono>
 #include "mqtt/async_client.h"
 
-
 // The will message when connection is interrupted
 const char *LWT_PAYLOAD = "Last will and testament.";
-
 
 // Changes may take place anytime when new mqtt messages arrive.
 mqtt::const_message_ptr NEWEST_MESSAGE;
@@ -29,7 +27,7 @@ class Callback : public virtual mqtt::callback
 private:
     /* data */
 public:
-    Callback(/* args */){};
+    Callback(/* args */) {};
     /**
      * This method is called when the client is connected.
      * Note that, in response to an initial connect(), the token from the
@@ -66,7 +64,7 @@ public:
                   << (tok ? tok->get_message_id() : -1) << std::endl;
     };
 
-    ~Callback(){};
+    ~Callback() {};
 };
 
 class Mqttclient : public mqtt::async_client
@@ -82,7 +80,7 @@ public:
     Mqttclient(const std::string &serverURI, const std::string &clientId, const std::string &publishTopic, int qos);
     std::string get_newest_message()
     {
-        return NEWEST_MESSAGE->to_string();
+        return NEWEST_MESSAGE ? NEWEST_MESSAGE->to_string() : "";
     };
     // using default subscribe
     // token_ptr subscribe(const string& topicFilter, int qos) override;
@@ -111,6 +109,7 @@ Mqttclient::Mqttclient(const std::string &serverURI, const std::string &clientId
 
 Mqttclient::~Mqttclient()
 {
+    disconnect()->wait();
 }
 
 /////////////////////////////////////////////////////////////////////////////

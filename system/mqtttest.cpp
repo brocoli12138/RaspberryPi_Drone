@@ -11,7 +11,7 @@ int main()
     char msg[]{0x01, 0x02, 0x03};
     Mqttclient client{DFLT_SERVER_ADDRESS, CLIENT_ID, PUBTOPIC, QOS};
     client.subscribe(SUBTOPIC, QOS);
-    client.publish(msg, QOS);
-    std::cout << client.get_newest_message();
+    //client.publish(msg, QOS);
+    //std::cout << client.get_newest_message();
     return 0;
 }
