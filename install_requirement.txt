@@ -38,6 +38,7 @@ ninja -C build
 sudo ninja -C build install
 *******On devices with 1GB of memory or less, the build may exceed available memory. Append the -j 1 flag to ninja commands to limit the build to a single process. This should prevent the build from exceeding available memory on devices like the Raspberry Pi Zero and the Raspberry Pi 3.*******
 *******libcamera does not yet have a stable binary interface. Always build rpicam-apps after you build libcamera.*******
+sudo mv /usr/local/include/libcamera/libcamera/* /usr/local/include/libcamera/ && sudo rm -r /usr/local/include/libcamera/libcamera
 sudo apt-get install libavcodec-dev libavdevice-dev libavformat-dev libswresample-dev
 sudo apt-get install libpng-dev libepoxy-dev libjpeg-dev
 git clone https://github.com/raspberrypi/rpicam-apps.git

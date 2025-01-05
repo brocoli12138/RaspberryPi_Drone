@@ -7,6 +7,8 @@
 using namespace libcamera;
 using namespace std::chrono_literals;
 
+static std::shared_ptr<Camera> camera;
+
 static void requestComplete(Request *request);
 
 int main()
@@ -15,8 +17,8 @@ int main()
     cm->start();
 
     // List available cameras
-    for (auto const &camera : cm->cameras())
-        std::cout << camera->id() << std::endl;
+    for (auto const &cam : cm->cameras())
+        std::cout << cam->id() << std::endl;
 
     auto cameras = cm->cameras();
     if (cameras.empty())
@@ -30,7 +32,7 @@ int main()
     std::string cameraId = cameras[0]->id();
 
     // Get the first available camera
-    auto camera = cm->get(cameraId);
+    camera = cm->get(cameraId);
     camera->acquire();
 
     // Generate and configure camera settings
