@@ -1,15 +1,7 @@
 /*-------------pre-install software utilities-------------*/
 sudo apt-get install -y libssl-dev openssl g++ git wget
-sudo apt-get install -y doxygen graphviz
+sudo apt-get install -y doxygen graphviz cmake
 sudo apt-get install -y libi2c-dev libi2c-tools 
-sudo apt install -y libboost-dev
-sudo apt install -y libgnutls28-dev openssl libtiff5-dev pybind11-dev
-sudo apt install -y qtbase5-dev libqt5core5a libqt5gui5 libqt5widgets5
-sudo apt install -y meson cmake
-sudo apt install -y python3-yaml python3-ply
-sudo apt install -y libglib2.0-dev libgstreamer-plugins-base1.0-dev
-sudo apt install -y cmake libboost-program-options-dev libdrm-dev libexif-dev
-sudo apt install -y ninja-build
 
 /*-------------install MQTT broker-------------*/
 https://www.emqx.com/en/downloads-and-install/broker?os=Ubuntu
@@ -30,6 +22,14 @@ sudo cmake -Bbuild -H. -DPAHO_WITH_MQTT_C=ON -DPAHO_BUILD_EXAMPLES=ON
 sudo cmake --build build/ --target install
 
 /*-------------install libcamera and rpicamera-apps-------------*/
+sudo apt-get install -y libboost-dev
+sudo apt-get install -y libgnutls28-dev pybind11-dev
+sudo apt-get install -y qtbase5-dev libqt5core5a libqt5gui5 libqt5widgets5
+sudo apt-get install -y meson
+sudo apt-get install -y python3-yaml python3-ply
+sudo apt-get install -y libglib2.0-dev libgstreamer-plugins-base1.0-dev
+sudo apt-get install -y libboost-program-options-dev libdrm-dev libexif-dev
+sudo apt-get install -y ninja-build
 git clone https://github.com/raspberrypi/libcamera.git
 cd libcamera
 meson setup build --buildtype=release -Dpipelines=rpi/vc4,rpi/pisp -Dipas=rpi/vc4,rpi/pisp -Dv4l2=true -Dgstreamer=enabled -Dtest=false -Dlc-compliance=disabled -Dcam=disabled -Dqcam=disabled -Ddocumentation=disabled -Dpycamera=enabled
@@ -38,8 +38,8 @@ ninja -C build
 sudo ninja -C build install
 *******On devices with 1GB of memory or less, the build may exceed available memory. Append the -j 1 flag to ninja commands to limit the build to a single process. This should prevent the build from exceeding available memory on devices like the Raspberry Pi Zero and the Raspberry Pi 3.*******
 *******libcamera does not yet have a stable binary interface. Always build rpicam-apps after you build libcamera.*******
-sudo apt install libavcodec-dev libavdevice-dev libavformat-dev libswresample-dev
-sudo apt install libpng-dev libepoxy-dev
+sudo apt-get install libavcodec-dev libavdevice-dev libavformat-dev libswresample-dev
+sudo apt-get install libpng-dev libepoxy-dev libjpeg-dev
 git clone https://github.com/raspberrypi/rpicam-apps.git
 cd rpicam-apps
 meson setup build -Denable_libav=enabled -Denable_drm=enabled -Denable_egl=enabled -Denable_qt=enabled -Denable_opencv=disabled -Denable_tflite=disabled -Denable_hailo=disabled
