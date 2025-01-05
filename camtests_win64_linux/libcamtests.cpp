@@ -2,13 +2,10 @@
 #include <iostream>
 #include <memory>
 #include <thread>
-
 #include <libcamera/libcamera.h>
 
 using namespace libcamera;
 using namespace std::chrono_literals;
-
-static std::shared_ptr<Camera> camera;
 
 static void requestComplete(Request *request);
 
@@ -16,6 +13,8 @@ int main()
 {
     std::unique_ptr<CameraManager> cm = std::make_unique<CameraManager>();
     cm->start();
+
+    // List available cameras
     for (auto const &camera : cm->cameras())
         std::cout << camera->id() << std::endl;
 
@@ -30,22 +29,23 @@ int main()
 
     std::string cameraId = cameras[0]->id();
 
+    // Get the first available camera
     auto camera = cm->get(cameraId);
-    /*
-     * Note that `camera` may not compare equal to `cameras[0]`.
-     * In fact, it might simply be a `nullptr`, as the particular
-     * device might have disappeared (and reappeared) in the meantime.
-     */
     camera->acquire();
+
+    // Generate and configure camera settings
     std::unique_ptr<CameraConfiguration> config = camera->generateConfiguration({StreamRole::Viewfinder});
     StreamConfiguration &streamConfig = config->at(0);
     std::cout << "Default viewfinder configuration is: " << streamConfig.toString() << std::endl;
+
+    // Set resolution to 640x480
     streamConfig.size.width = 640;
     streamConfig.size.height = 480;
     config->validate();
     std::cout << "Validated viewfinder configuration is: " << streamConfig.toString() << std::endl;
     camera->configure(config.get());
 
+    // Allocate frame buffers
     FrameBufferAllocator *allocator = new FrameBufferAllocator(camera);
     for (StreamConfiguration &cfg : *config)
     {
@@ -86,10 +86,15 @@ int main()
 
     camera->requestCompleted.connect(requestComplete);
 
+    // Start and queue requests
     camera->start();
     for (std::unique_ptr<Request> &request : requests)
         camera->queueRequest(request.get());
 
+    // Process requests (this would typically be handled in a loop or separate thread)
+    std::this_thread::sleep_for(5s);
+
+    // Stop the camera and release resources
     camera->stop();
     allocator->free(stream);
     delete allocator;
