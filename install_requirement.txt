@@ -54,9 +54,22 @@ sudo ldconfig
 *******Run the following command to check that your device uses the new binary:*******
 rpicam-still --version
 
-/*-------------compile and link-------------*/
+/*-------------matt client compile and link-------------*/
 g++ -o async_publish async_publish.cpp -lpaho-mqttpp3 -lpaho-mqtt3a -lpthread
 ******If you want to communicate over an encrypted channel, please add the following compile options:******
 -lssl -lcrypto
+/*-------------libcamera apps compile and link-------------*/
+g++ -o libcamtests libcamtests.cpp -lcamera -lcamera-base
 
+
+/*-------------some chaos dont mind-------------*/
 0c45:6725
+https://repo.anaconda.com/archive/Anaconda3-2024.10-1-Linux-x86_64.sh
+conda config --set auto_activate_base false
+
+/*-------------map the camera to wsl-------------*/
+winget install usbipd
+usbipd list
+usbipd bind --busid 2-6
+usbipd attach --wsl --busid 2-6
+lsusb  // in wsl
