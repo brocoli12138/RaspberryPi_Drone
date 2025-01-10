@@ -1,12 +1,11 @@
 import cv2
 import paho.mqtt.client as mqtt
-import base64
 import numpy as np
 
 # MQTT Broker 地址和主题
-MQTT_BROKER = "192.168.121.117"
+MQTT_BROKER = "192.168.50.89"
 MQTT_PORT = 1883
-MQTT_TOPIC = "video/frames"
+MQTT_TOPIC = "data/video"
 
 # 初始化 MQTT 客户端
 client = mqtt.Client()
@@ -16,22 +15,45 @@ def on_connect(client, userdata, flags, rc):
     print(f"连接成功，返回码：{rc}")
     client.subscribe(MQTT_TOPIC)
 
+# YUYV 转换为 RGB
+def yuyv_to_rgb(frame, width, height):
+    """
+    将 YUYV 格式的帧数据转换为 RGB 格式。
+    :param frame: YUYV 格式的帧数据
+    :param width: 图像的宽度
+    :param height: 图像的高度
+    :return: RGB 图像
+    """
+    yuyv = np.frombuffer(frame, dtype=np.uint8).reshape((height, width, 2))
+    y = yuyv[:, :, 0]
+    u = yuyv[::2, :, 1]  # 每隔两个像素取一个 U
+    v = yuyv[1::2, :, 1]  # 每隔两个像素取一个 V
+
+    # 将 U 和 V 插值到整个图像
+    u = cv2.resize(u, (width, height), interpolation=cv2.INTER_LINEAR)
+    v = cv2.resize(v, (width, height), interpolation=cv2.INTER_LINEAR)
+
+    # 合并 YUV 数据
+    yuv = np.stack((y, u, v), axis=-1)
+
+    # 转换为 RGB 格式
+    rgb = cv2.cvtColor(yuv, cv2.COLOR_YUV2BGR)
+    return rgb
+
 # MQTT 接收到消息回调函数
 def on_message(client, userdata, msg):
-    # 接收到的消息是 Base64 编码的帧
+    # 假设帧数据直接以 YUYV 格式发送
     try:
-        frame_base64 = msg.payload.decode('utf-8')
-        # 将 Base64 字符串解码为字节流
-        frame_data = base64.b64decode(frame_base64)
-        # 将字节流转换为图像
-        np_arr = np.frombuffer(frame_data, dtype=np.uint8)
-        frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        frame_data = msg.payload
+        print(f"Received data size: {len(msg.payload)}")
+        width = 800  # 解析数据前需知道图像宽度
+        height = 600  # 解析数据前需知道图像高度
 
-        # 显示接收到的视频帧
-        if frame is not None:
-            cv2.imshow("Received Video", frame)
-        else:
-            print("解码失败，接收到的数据不是有效的图像帧")
+        # 将 YUYV 转换为 RGB 图像
+        rgb_frame = yuyv_to_rgb(frame_data, width, height)
+
+        # 显示接收到的 RGB 图像
+        cv2.imshow("Received Video", rgb_frame)
     except Exception as e:
         print(f"处理消息时发生错误：{e}")
 

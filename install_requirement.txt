@@ -61,8 +61,7 @@ g++ -o async_publish async_publish.cpp -lpaho-mqttpp3 -lpaho-mqtt3a -lpthread
 /*-------------libcamera apps compile and link-------------*/
 g++ -o libcamtests libcamtests.cpp -lcamera -lcamera-base
 
-
-/*-------------some chaos dont mind-------------*/
+/*-------------install anaconda-------------*/
 0c45:6725
 https://repo.anaconda.com/archive/Anaconda3-2024.10-1-Linux-x86_64.sh
 conda config --set auto_activate_base false
@@ -73,3 +72,162 @@ usbipd list
 usbipd bind --busid 2-6
 usbipd attach --wsl --busid 2-6
 lsusb  // in wsl
+
+/*-------------install ffmpeg to accelerate video transfer-------------*/
+sudo apt-get install libomxil-bellagio-dev libva-dev
+sudo apt-get install libasound2-dev
+
+
+/*-------------some chaos dont mind-------------*/
+[0:37:39.565288501] [3707]  INFO Camera camera_manager.cpp:325 libcamera v0.3.2+99-1230f78d
+[0:37:39.586426022] [3708]  INFO RPI pisp.cpp:695 libpisp version v1.0.7 28196ed6edcf 06-01-2025 (20:31:17)
+[0:37:39.597646698] [3708]  INFO RPI pisp.cpp:1154 Registered camera /base/axi/pcie@120000/rp1/i2c@80000/imx219@10 to CFE device /dev/media0 and ISP device /dev/media1 using PiSP variant BCM2712_C0
+ - 'imx219' (/base/axi/pcie@120000/rp1/i2c@80000/imx219@10)
+[0:37:39.598083136] [3707]  WARN V4L2 v4l2_pixelformat.cpp:346 Unsupported V4L2 pixel format RPBP
+Default viewfinder configuration is: 800x600-XRGB8888
+Validated viewfinder configuration is: 800x600-XRGB8888
+[0:37:39.598307939] [3707]  INFO Camera camera.cpp:1197 configuring streams: (0) 800x600-XRGB8888
+[0:37:39.598452813] [3708]  INFO RPI pisp.cpp:1450 Sensor: /base/axi/pcie@120000/rp1/i2c@80000/imx219@10 - Selected sensor format: 1640x1232-SBGGR10_1X10 - Selected CFE format: 1640x1232-PC1B
+Allocated 4 buffers for stream
+
+[0:43:15.728512874] [3864]  INFO Camera camera_manager.cpp:325 libcamera v0.3.2+99-1230f78d
+[0:43:15.748991084] [3865]  INFO RPI pisp.cpp:695 libpisp version v1.0.7 28196ed6edcf 06-01-2025 (20:31:17)
+[0:43:15.760333270] [3865]  INFO RPI pisp.cpp:1154 Registered camera /base/axi/pcie@120000/rp1/i2c@80000/imx219@10 to CFE device /dev/media0 and ISP device /dev/media1 using PiSP variant BCM2712_C0
+[0:43:15.760692902] [3864]  WARN V4L2 v4l2_pixelformat.cpp:346 Unsupported V4L2 pixel format RPBP
+[0:43:15.760901682] [3864]  INFO Camera camera.cpp:1197 configuring streams: (0) 800x600-XRGB8888
+[0:43:15.761072572] [3865]  INFO RPI pisp.cpp:1450 Sensor: /base/axi/pcie@120000/rp1/i2c@80000/imx219@10 - Selected sensor format: 1640x1232-SBGGR10_1X10 - Selected CFE format: 1640x1232-PC1B
+
+     yuyv422 :           YUYV 4:2:2 : {16-16384, 2}x{16-16384, 1}
+     uyvy422 :           UYVY 4:2:2 : {16-16384, 2}x{16-16384, 1}
+    rgb565le :     16-bit RGB 5-6-5 : {16-16384, 2}x{16-16384, 1}
+    rgb565be :  16-bit RGB 5-6-5 BE : {16-16384, 2}x{16-16384, 1}
+    rgb555le : 16-bit A/XRGB 1-5-5-5 : {16-16384, 2}x{16-16384, 1}
+    rgb555be : 16-bit A/XRGB 1-5-5-5 BE : {16-16384, 2}x{16-16384, 1}
+       rgb24 :     24-bit RGB 8-8-8 : {16-16384, 2}x{16-16384, 1}
+       bgr24 :     24-bit BGR 8-8-8 : {16-16384, 2}x{16-16384, 1}
+        0rgb : 32-bit A/XRGB 8-8-8-8 : {16-16384, 2}x{16-16384, 1}
+ bayer_bggr8 : 8-bit Bayer BGBG/GRGR : {16-16384, 2}x{16-16384, 1}
+ bayer_gbrg8 : 8-bit Bayer GBGB/RGRG : {16-16384, 2}x{16-16384, 1}
+ bayer_grbg8 : 8-bit Bayer GRGR/BGBG : {16-16384, 2}x{16-16384, 1}
+ bayer_rggb8 : 8-bit Bayer RGRG/GBGB : {16-16384, 2}x{16-16384, 1}
+        gray :      8-bit Greyscale : {16-16384, 2}x{16-16384, 1}
+    gray16le :     16-bit Greyscale : {16-16384, 2}x{16-16384, 1}
+
+'YUYV' (YUYV 4:2:2)
+'UYVY' (UYVY 4:2:2)
+'YVYU' (YVYU 4:2:2)
+'VYUY' (VYUY 4:2:2)
+'RGBP' (16-bit RGB 5-6-5)
+'RGBR' (16-bit RGB 5-6-5 BE)
+'RGBO' (16-bit A/XRGB 1-5-5-5)
+'RGBQ' (16-bit A/XRGB 1-5-5-5 BE)
+'RGB3' (24-bit RGB 8-8-8)
+'BGR3' (24-bit BGR 8-8-8)
+'RGB4' (32-bit A/XRGB 8-8-8-8)
+'BA81' (8-bit Bayer BGBG/GRGR)
+'GBRG' (8-bit Bayer GBGB/RGRG)
+'GRBG' (8-bit Bayer GRGR/BGBG)
+'RGGB' (8-bit Bayer RGRG/GBGB)
+'pBAA' (10-bit Bayer BGBG/GRGR Packed)
+'pGAA' (10-bit Bayer GBGB/RGRG Packed)
+'pgAA' (10-bit Bayer GRGR/BGBG Packed)
+'pRAA' (10-bit Bayer RGRG/GBGB Packed)
+'pBCC' (12-bit Bayer BGBG/GRGR Packed)
+'pGCC' (12-bit Bayer GBGB/RGRG Packed)
+'pgCC' (12-bit Bayer GRGR/BGBG Packed)
+'pRCC' (12-bit Bayer RGRG/GBGB Packed)
+'pBEE' (14-bit Bayer BGBG/GRGR Packed)
+'pGEE' (14-bit Bayer GBGB/RGRG Packed)
+'pgEE' (14-bit Bayer GRGR/BGBG Packed)
+'pREE' (14-bit Bayer RGRG/GBGB Packed)
+'BYR2' (16-bit Bayer BGBG/GRGR)
+'GB16' (16-bit Bayer GBGB/RGRG)
+'GR16' (16-bit Bayer GRGR/BGBG)
+'RG16' (16-bit Bayer RGRG/GBGB)
+'PC1R' (PiSP Bayer Compressed Format, compressed)
+'PC1B' (PiSP Bayer Compressed Format, compressed)
+'PC1g' (PiSP Bayer Compressed Format, compressed)
+'PC1G' (PiSP Bayer Compressed Format, compressed)
+'GREY' (8-bit Greyscale)
+'Y10P' (10-bit Greyscale (MIPI Packed))
+'Y12P' (12-bit Greyscale (MIPI Packed))
+'Y14P' (14-bit Greyscale (MIPI Packed))
+'Y16' (16-bit Greyscale)
+'PC1M' (PiSP Bayer Compressed Format, compressed)
+
+
+
+
+
+
+
+
+    
+// 安装依赖
+sudo apt-get -y install autoconf automake build-essential cmake git-core libass-dev libfreetype6-dev libgnutls28-dev libsdl2-dev libtool libva-dev libvorbis-dev meson ninja-build pkg-config texinfo wget yasm zlib1g-dev nasm libaom-dev libmp3lame-dev libopus-dev libx264-dev libvpx-dev libavfilter-dev
+    
+// 安装omx依赖
+sudo apt-get install libomxil-bellagio-dev
+
+11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+wget https://www.nasm.us/pub/nasm/releasebuilds/2.16.03/nasm-2.16.03.tar.gz
+tar zxvf nasm-2.16.03.tar.gz
+./configure --prefix=/usr/local/nasm
+make && sudo make install
+export PATH=/usr/local/nasm/bin:$PATH
+
+/* 编译x264（若git不下来,可联系笔者获取已下好的x264源码包） */
+git clone https://code.videolan.org/videolan/x264.git
+cd x264
+./configure --enable-shared --enable-static --enable-strip --disable-cli --prefix=/usr/local/x264
+make -j4
+sudo make install
+
+sudo apt install zlib1g-dev libghc-bzlib-dev libpng-dev libpng++-dev libharfbuzz-dev
+wget http://download.savannah.gnu.org/releases/freetype/freetype-2.13.3.tar.gz
+./configure --prefix=/usr/local/freetype2 --enable-shared --enable-static
+make && sudo make install
+
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/freetype2/lib/pkgconfig
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/x264/lib/pkgconfig
+
+sudo apt install -y libraspberry*
+sudo apt install libopengl-dev libgles-dev libgl-dev libegl-dev libopengl0 libgles2 libgles1
+sudo apt install -y libfribidi-dev libfontconfig1-dev libfontconfig1
+# ffmpeg 编码安装
+git clone https://git.ffmpeg.org/ffmpeg.git ffmpeg
+cd ffmpeg
+PREFIX=/usr/local
+./configure --target-os=linux --prefix=/usr/local/ffmpeg --enable-opengl --enable-gpl --enable-version3 --enable-nonfree --enable-static --disable-shared --disable-opencl --disable-thumb --disable-pic --disable-stripping --enable-small --enable-ffmpeg --enable-ffplay --enable-ffprobe --disable-doc --disable-htmlpages --disable-podpages --disable-txtpages --disable-manpages --disable-everything --enable-libx264 --enable-encoder=libx264 --enable-decoder=h264 --enable-encoder=aac --enable-decoder=aac --enable-encoder=ac3 --enable-decoder=ac3 --enable-encoder=rawvideo --enable-decoder=rawvideo --enable-encoder=mjpeg --enable-decoder=mjpeg --enable-demuxer=concat --enable-muxer=flv --enable-demuxer=flv --enable-demuxer=live_flv --enable-muxer=hls --enable-muxer=segment --enable-muxer=stream_segment --enable-muxer=mov --enable-demuxer=mov --enable-muxer=mp4 --enable-muxer=mpegts --enable-demuxer=mpegts --enable-demuxer=mpegvideo --enable-muxer=matroska --enable-demuxer=matroska --enable-muxer=wav --enable-demuxer=wav --enable-muxer=pcm* --enable-demuxer=pcm* --enable-muxer=rawvideo --enable-demuxer=rawvideo --enable-muxer=rtsp --enable-demuxer=rtsp --enable-muxer=rtsp --enable-demuxer=sdp --enable-muxer=fifo --enable-muxer=tee --enable-muxer=image2 --enable-demuxer=image2 --enable-parser=h264 --enable-parser=aac --enable-protocol=file --enable-protocol=tcp --enable-protocol=rtmp --enable-protocol=cache --enable-protocol=pipe --enable-filter=aresample --enable-filter=allyuv --enable-filter=scale --enable-indev=v4l2 --enable-indev=alsa --enable-outdev=alsa --enable-libfreetype --enable-libfribidi --enable-omx --enable-omx-rpi --enable-encoder=h264_omx
+ --enable-mmal --enable-hwaccel=h264_mmal --enable-decoder=h264_mmal
+make -j4
+sudo make install
+
+
+
+
+
+./configure   --arch=armhf --target-os=linux --disable-doc --disable-htmlpages --disable-manpages --disable-podpages \
+    --disable-txtpages --enable-librtmp  --enable-zlib --enable-bzlib --enable-openssl  --enable-shared  --enable-static \
+    --enable-gpl  --enable-libx264  --enable-omx --enable-omx-rpi --enable-mmal --enable-nonfree --enable-libopus \
+    --enable-libfreetype --enable-libfontconfig --enable-libfribidi \
+    --enable-runtime-cpudetect --enable-postproc --enable-pic --enable-neon --enable-vfp --enable-libvpx \
+    --enable-cross-compile --cross-prefix=arm-linux-gnueabihf- --enable-libmp3lame --enable-hardcoded-tables --disable-encoders \
+    --enable-encoder="opus,libopus,libvpx8,libvpx9,vp8_v4l2m2m,h264_omx,mjpeg,mpeg2video,png,libx264,h264_v4l2m2m,flv,mpeg4_v4l2m2m,mpeg4" \
+    --disable-decoders --enable-decoder="opus,libopus,libvpx8,libvpx9,vp9,vp9_v4l2m2m,vp8,vp8_v4l2m2m,png,mjpeg,h264,mpeg2video,mpeg2_mmal,h264_mmal,rawvideo,flv,mpeg4_mmal,mpeg4_v4l2m2m,vc1_mmal"   \
+    --disable-muxers --enable-muxer="opus,webm,webm_chunk,webm_dash_manifest,dash,avi,mp4,hls,rtp_mpegts,rtsp,mpegts,mjpeg,h264,flv" \
+    --disable-demuxers --enable-demuxer="dash,webm_dash_manifest,h264,hls,mjpeg,rtp,rtsp,flv" \
+    --disable-parsers --enable-parser="opus,vp8,vp9,png,h264,mjpeg,mpeg4video" \
+    --sysroot=/media/michael/rootfs \
+    --extra-cflags="-I/media/michael/rootfs/usr/include -I/media/michael/rootfs/opt/vc/include/IL \
+                       -I/media/michael/rootfs/opt/vc/include -I/media/michael/rootfs/usr/include/arm-linux-gnueabihf \
+                       -I/media/michael/rootfs/usr/include/freetype2 -I/media/michael/rootfs/usr/include/fribidi \
+                       -O2 -pipe -march=armv6 -mfpu=vfp -mfloat-abi=hard"  \
+    --extra-cxxflags='-O2 -pipe -march=armv6 -mfpu=vfp -mfloat-abi=hard' \
+    --extra-ldflags="--sysroot=/media/michael/rootfs -L/media/michael/rootfs/opt/vc/lib \
+                     -L/media/michael/rootfs/usr/lib/arm-linux-gnueabihf -L/media/michael/rootfs/opt/vc/lib \
+                    -L/media/michael/rootfs/usr/lib -L/media/michael/rootfs/lib/arm-linux-gnueabihf -lmmal -lmmal_core -lvcos
+                    -lmmal_vc_client -lmmal_components -lvchiq_arm \
+                    -lvcsm -lmmal_util -lcontainers -lpthread" \
+    --extra-libs="-lz -lrt -lresolv -lnsl -lm -ldl -lbz2 -lpthread" \
+    --prefix=/media/michael/rootfs/usr/local

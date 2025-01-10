@@ -58,10 +58,8 @@ public:
      * Called when delivery for a message has been completed, and all
      * acknowledgments have been received.
      */
-    void delivery_complete(mqtt::delivery_token_ptr tok) override
-    {
-        std::cout << "\tDelivery complete for token: "
-                  << (tok ? tok->get_message_id() : -1) << std::endl;
+    void delivery_complete(mqtt::delivery_token_ptr tok) override {
+        // std::cout << "\tDelivery complete for token: " << (tok ? tok->get_message_id() : -1) << std::endl;
     };
 
     ~Callback() {};
@@ -84,9 +82,11 @@ public:
     };
     // using default subscribe
     // token_ptr subscribe(const string& topicFilter, int qos) override;
-    mqtt::delivery_token_ptr publish(mqtt::binary_ref payload, int qos, bool retained = false)
+    mqtt::delivery_token_ptr publish(std::vector<uint8_t> payload, int qos, bool retained = false)
     {
-        return _publishTopic.publish(payload, qos, retained);
+        mqtt::binary_ref payload_ref(reinterpret_cast<const char *>(payload.data()), payload.size());
+        std::cout << "payloadlength: " << payload_ref.length() << std::endl;
+        return _publishTopic.publish(payload_ref, qos, retained);
     };
     ~Mqttclient();
 };
