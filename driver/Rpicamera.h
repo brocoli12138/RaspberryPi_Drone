@@ -21,12 +21,12 @@ private:
     FrameBufferAllocator *_allocator;
     std::vector<std::unique_ptr<Request>> _requests;
     volatile bool _isStopped;
-    void (*_callback)(std::vector<unsigned char>);
+    void (*_callback)(std::vector<unsigned char> &);
     void requestComplete(Request *request);
 
 public:
     Rpicamera(const int n = 0);
-    void start(void (*callback)(std::vector<unsigned char>));
+    void start(void (*callback)(std::vector<unsigned char> &));
     ~Rpicamera();
 };
 
@@ -159,7 +159,7 @@ void Rpicamera::requestComplete(Request *request)
         _camera->queueRequest(request);
     }
 }
-void Rpicamera::start(void (*callback)(std::vector<unsigned char>))
+void Rpicamera::start(void (*callback)(std::vector<unsigned char> &))
 {
     _callback = callback;
     for (std::unique_ptr<Request> &request : _requests)

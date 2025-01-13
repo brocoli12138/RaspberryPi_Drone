@@ -78,3 +78,4 @@ sudo apt-get install -y ffmpeg
 
 g++ -o video_encoder video_encoder.cpp -lavcodec -lavformat -lavutil -lswscale -lpthread
 
+sudo apt-get install libavcodec-dev libavformat-dev libavutil-dev libswscale-dev
