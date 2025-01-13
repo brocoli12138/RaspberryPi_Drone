@@ -58,7 +58,7 @@ Rpicamera::Rpicamera(const int n /* = 0 */)
     streamConfig.size.width = 800;  // 4096
     streamConfig.size.height = 600; // 2560
     streamConfig.bufferCount = DFT_BUFFER_COUNT;
-    streamConfig.pixelFormat = PixelFormat::fromString("YUYV");
+    streamConfig.pixelFormat = PixelFormat::fromString("YUV420");
 
     // check if all stream configuration is valid
     _cameraConfiguration->validate();
@@ -164,9 +164,6 @@ void Rpicamera::start(void (*callback)(std::vector<unsigned char>))
     _callback = callback;
     for (std::unique_ptr<Request> &request : _requests)
         _camera->queueRequest(request.get());
-
-    // Process requests (this would typically be handled in a loop or separate thread)
-    std::this_thread::sleep_for(std::chrono::seconds(5));
 }
 
 Rpicamera::~Rpicamera()

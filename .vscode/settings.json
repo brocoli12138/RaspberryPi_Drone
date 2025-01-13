@@ -91,6 +91,7 @@
         "unordered_set": "cpp",
         "filesystem": "cpp",
         "csignal": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "bitset": "cpp"
     }
 }
