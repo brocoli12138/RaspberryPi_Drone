@@ -27,6 +27,7 @@ private:
 public:
     Rpicamera(const int n = 0);
     void start(void (*callback)(std::vector<unsigned char> &));
+    void stop() { _isStopped = true; };
     ~Rpicamera();
 };
 
@@ -58,7 +59,7 @@ Rpicamera::Rpicamera(const int n /* = 0 */)
     streamConfig.size.width = 800;  // 4096
     streamConfig.size.height = 600; // 2560
     streamConfig.bufferCount = DFT_BUFFER_COUNT;
-    streamConfig.pixelFormat = PixelFormat::fromString("YUV420");
+    streamConfig.pixelFormat = PixelFormat::fromString("YUYV");
 
     // check if all stream configuration is valid
     _cameraConfiguration->validate();
@@ -109,48 +110,22 @@ void Rpicamera::requestComplete(Request *request)
     if (request->status() == Request::RequestCancelled)
         return;
 
-    // Process completed request
     const Request::BufferMap &buffers = request->buffers();
-    for (auto bufferPair : buffers)
+    const FrameBuffer *buffer = buffers.begin()->second;
+    size_t length = 0;
+    auto &planes = buffer->planes();
+    void *data = nullptr;
+    std::vector<unsigned char> aFrameDataBuff;
+    for (auto plane : planes)
     {
-        // (Unused) Stream *stream = bufferPair.first;
-        FrameBuffer *buffer = bufferPair.second;
-        if (!buffer)
-        {
-            continue;
-        }
-
-        std::vector<unsigned char> aFrameDataBuff;
-        int frameSize = 0;
-        // Access the buffer data
-        for (const FrameBuffer::Plane &plane : buffer->planes())
-        {
-            void *data = mmap(nullptr, plane.length, PROT_READ | PROT_WRITE, MAP_SHARED, plane.fd.get(), 0);
-            unsigned int size = plane.length;
-            if (data == MAP_FAILED)
-            {
-                std::cerr << "Failed to map buffer memory" << std::endl;
-                continue;
-            }
-
-            std::vector<unsigned char> planedata(size);
-            memcpy(planedata.data(), data, size);
-            aFrameDataBuff.insert(aFrameDataBuff.end(), planedata.begin(), planedata.end());
-            munmap(data, plane.length);
-            frameSize += size;
-        }
-        // std::cout << "Frame captured, size: " << frameSize << " bytes" << std::endl;
-        //_frameDataList.push_back(aFrameDataBuff);
-        _callback(aFrameDataBuff);
-
-        /* Re-queue the Request to the camera. */
-        request->reuse(Request::ReuseBuffers);
-        if (!_isStopped)
-        {
-            _camera->queueRequest(request);
-        }
-        return;
+        data = mmap(nullptr, plane.length, PROT_READ | PROT_WRITE, MAP_SHARED, plane.fd.get(), 0);
+        aFrameDataBuff.resize(length + plane.length);
+        memcpy(aFrameDataBuff.data() + length, data, plane.length);
+        munmap(data, plane.length);
+        length += plane.length;
     }
+    _callback(aFrameDataBuff);
+    std::cout << "Framedatalength in RPI:" << length << std::endl;
 
     /* Re-queue the Request to the camera. */
     request->reuse(Request::ReuseBuffers);

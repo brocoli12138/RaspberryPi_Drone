@@ -3,7 +3,7 @@
 
 std::vector<std::vector<unsigned char>> frameDataList;
 
-void mycallback(std::vector<unsigned char> data)
+void mycallback(std::vector<unsigned char> &data)
 {
     frameDataList.push_back(data);
     std::cout << "pushbacked!" << std::endl;

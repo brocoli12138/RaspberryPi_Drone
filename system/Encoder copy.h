@@ -7,7 +7,6 @@ extern "C"
 #include <libavformat/avformat.h>
 #include <libavutil/opt.h>
 #include <libavutil/imgutils.h>
-#include <libswscale/swscale.h>
 }
 
 #include <stdio.h>
@@ -27,8 +26,6 @@ private:
     AVCodecContext *_ctx;
     AVFrame *_frame;
     AVPacket *_pkt;
-    AVFrame *_transformed_frame;
-    struct SwsContext *_sws_ctx;
     int _frameNo;
 
 protected:
@@ -40,7 +37,7 @@ public:
     ~Encoder();
 };
 
-Encoder::Encoder(/* args */) : _codec(nullptr), _ctx(nullptr), _frame(nullptr), _pkt(nullptr), _transformed_frame(nullptr), _sws_ctx(nullptr), _frameNo(0)
+Encoder::Encoder(/* args */) : _codec(nullptr), _ctx(nullptr), _frame(nullptr), _pkt(nullptr), _frameNo(0)
 {
     // Find H.264 encoder
     _codec = avcodec_find_encoder(AV_CODEC_ID_H264);
@@ -66,7 +63,7 @@ Encoder::Encoder(/* args */) : _codec(nullptr), _ctx(nullptr), _frame(nullptr), 
     _ctx->framerate = (AVRational){FPS, 1};
     _ctx->gop_size = 12; // I-frame interval
     _ctx->max_b_frames = 1;
-    _ctx->pix_fmt = AV_PIX_FMT_YUV420P; // Set to YUYV422 pixel format
+    _ctx->pix_fmt = AV_PIX_FMT_YUYV422; // Set to YUYV422 pixel format
 
     // Open codec
     if (avcodec_open2(_ctx, _codec, NULL) < 0)
@@ -77,39 +74,20 @@ Encoder::Encoder(/* args */) : _codec(nullptr), _ctx(nullptr), _frame(nullptr), 
 
     // Allocate frame
     _frame = av_frame_alloc();
-    _transformed_frame = av_frame_alloc();
-    if (!_frame || !_transformed_frame)
+    if (!_frame)
     {
         fprintf(stderr, "Could not allocate video frame\n");
         return; // Exit constructor if frame allocation fails
     }
 
-    _frame->format = AV_PIX_FMT_YUV420P;
+    _frame->format = _ctx->pix_fmt;
     _frame->width = _ctx->width;
     _frame->height = _ctx->height;
-    _transformed_frame->format = _ctx->pix_fmt;
-    _transformed_frame->width = _ctx->width;
-    _transformed_frame->height = _ctx->height;
 
     if (av_frame_get_buffer(_frame, 32) < 0)
     {
         fprintf(stderr, "Could not allocate raw picture buffer\n");
         return; // Exit constructor if image allocation fails
-    }
-
-    if (av_frame_get_buffer(_transformed_frame, 32) < 0)
-    {
-        fprintf(stderr, "Could not allocate raw picture buffer\n");
-        return; // Exit constructor if image allocation fails
-    }
-
-    _sws_ctx = sws_getContext(WIDTH, HEIGHT, AV_PIX_FMT_YUYV422,
-                              WIDTH, HEIGHT, AV_PIX_FMT_YUV420P,
-                              SWS_BILINEAR, nullptr, nullptr, nullptr);
-    if (!_sws_ctx)
-    {
-        printf("Failed to initialize the swscale context\n");
-        return;
     }
 
     _pkt = av_packet_alloc();
@@ -154,12 +132,11 @@ std::vector<std::vector<uint8_t>> Encoder::sync_encode(const std::vector<unsigne
     _frameNo++;
     // Convert data to AVFrame data
     // Copy the YUYV data into the frame's data
-    memcpy(_frame->data[0], data.data(), data.size());
-    // transform the pixel format
-    sws_scale(_sws_ctx, _frame->data, _frame->linesize, 0, HEIGHT, _transformed_frame->data, _transformed_frame->linesize);
+    memcpy(_frame->data[0], data.data(), data.size()); // Y
+
     // Encode video frame and get encoded data
-    _transformed_frame->pts = _frameNo; // Set PTS
-    if (avcodec_send_frame(_ctx, _transformed_frame) < 0)
+    _frame->pts = _frameNo; // Set PTS
+    if (avcodec_send_frame(_ctx, _frame) < 0)
     {
         fprintf(stderr, "Error sending frame to encoder\n");
         return {};
@@ -203,14 +180,6 @@ Encoder::~Encoder()
     if (_frame)
     {
         av_frame_free(&_frame);
-    }
-    if (!_transformed_frame)
-    {
-        av_frame_free(&_transformed_frame);
-    }
-    if (!_sws_ctx)
-    {
-        sws_freeContext(_sws_ctx);
     }
 }
 
