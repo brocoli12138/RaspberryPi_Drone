@@ -53,13 +53,13 @@ Rpicamera::Rpicamera(const int n /* = 0 */)
         return;
     }
     // configure the camera
-    _cameraConfiguration = _camera->generateConfiguration({StreamRole::Viewfinder});
+    _cameraConfiguration = _camera->generateConfiguration({StreamRole::VideoRecording});
 
     StreamConfiguration &streamConfig = _cameraConfiguration->at(0);
-    streamConfig.size.width = 800;  // 4096
-    streamConfig.size.height = 600; // 2560
+    streamConfig.size.width = 640;  // 4096
+    streamConfig.size.height = 480; // 2560
     streamConfig.bufferCount = DFT_BUFFER_COUNT;
-    streamConfig.pixelFormat = PixelFormat::fromString("YUYV");
+    streamConfig.pixelFormat = PixelFormat::fromString("YUV420");
 
     // check if all stream configuration is valid
     _cameraConfiguration->validate();
@@ -125,7 +125,7 @@ void Rpicamera::requestComplete(Request *request)
         length += plane.length;
     }
     _callback(aFrameDataBuff);
-    std::cout << "Framedatalength in RPI:" << length << std::endl;
+    // std::cout << "Framedatalength in RPI:" << length << std::endl;
 
     /* Re-queue the Request to the camera. */
     request->reuse(Request::ReuseBuffers);

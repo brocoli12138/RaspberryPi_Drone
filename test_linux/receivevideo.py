@@ -1,65 +1,62 @@
-import paho.mqtt.client as mqtt
-import numpy as np
 import cv2
+import numpy as np
+import paho.mqtt.client as mqtt
 
-# MQTT settings
-BROKER = "192.168.121.101"
-PORT = 1883
-TOPIC = "data/video"
+# MQTT configuration
+MQTT_BROKER = "192.168.121.101"
+MQTT_PORT = 1883
+MQTT_TOPIC = "data/video"
 
-def yuyv_to_rgb(yuyv_frame, width, height):
-    def clamp(value, min_val=0, max_val=255):
-        return max(min_val, min(value, max_val))
-    
-    # Create an empty array for the RGB frame
-    rgb_frame = np.zeros((height, width, 3), dtype=np.uint8)
-    
-    for y in range(height):
-        for x in range(0, width, 2):
-            # Get the Y, U, and V values from the YUYV frame
-            y1 = yuyv_frame[y * width * 2 + 2 * x]
-            u = yuyv_frame[y * width * 2 + 2 * x + 1]
-            y2 = yuyv_frame[y * width * 2 + 2 * x + 2]
-            v = yuyv_frame[y * width * 2 + 2 * x + 3]
-            
-            # Convert YUV to RGB for the first pixel
-            r1 = clamp(y1 + 1.402 * (v - 128))
-            g1 = clamp(y1 - 0.344136 * (u - 128) - 0.714136 * (v - 128))
-            b1 = clamp(y1 + 1.772 * (u - 128))
-            
-            # Convert YUV to RGB for the second pixel
-            r2 = clamp(y2 + 1.402 * (v - 128))
-            g2 = clamp(y2 - 0.344136 * (u - 128) - 0.714136 * (v - 128))
-            b2 = clamp(y2 + 1.772 * (u - 128))
-            
-            # Assign the RGB values to the corresponding positions in the RGB frame
-            rgb_frame[y, x] = [r1, g1, b1]
-            rgb_frame[y, x + 1] = [r2, g2, b2]
-    
-    return rgb_frame
+# Frame dimensions (update according to your setup)
+FRAME_WIDTH = 640
+FRAME_HEIGHT = 480
 
-# Callback when message is received
-def on_message(client, userdata, msg):
-     # Assuming msg.payload is the YUYV frame data
-    yuyv_frame = msg.payload
-    # Frame dimensions
-    width = 800  # Update with your frame width
-    height = 600  # Update with your frame height
-    rgb_image = yuyv_to_rgb(yuyv_frame, width, height)
+def on_message(client, userdata, message):
+    """Callback function to handle incoming MQTT messages."""
+    try:
+        # Decode the message payload into a numpy array
+        yuv_data = np.frombuffer(message.payload, dtype=np.uint8)
+        
+        # Ensure the data size matches the expected frame size
+        expected_size = FRAME_WIDTH * FRAME_HEIGHT * 3 // 2  # YUV420p size
+        if len(yuv_data) != expected_size:
+            print("Invalid frame size received!")
+            return
 
-    # Display the image
-    cv2.imshow("Received Frame", rgb_image)
-    cv2.waitKey(1)
+        # Reshape YUV420 data for OpenCV
+        yuv_frame = yuv_data.reshape((FRAME_HEIGHT * 3 // 2, FRAME_WIDTH))
 
-# MQTT client setup
-client = mqtt.Client()
-client.on_message = on_message
+        # Convert YUV420 to BGR for display
+        bgr_frame = cv2.cvtColor(yuv_frame, cv2.COLOR_YUV2BGR_I420)
 
-# Connect to the MQTT broker
-client.connect(BROKER, PORT)
+        # Display the frame
+        cv2.imshow("YUV420 Frame", bgr_frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            client.disconnect()
+            cv2.destroyAllWindows()
 
-# Subscribe to the topic
-client.subscribe(TOPIC)
+    except Exception as e:
+        print(f"Error processing frame: {e}")
 
-# Loop to keep receiving messages
-client.loop_forever()
+def main():
+    # Set up MQTT client
+    client = mqtt.Client()
+    client.on_message = on_message
+
+    try:
+        # Connect to MQTT broker
+        client.connect(MQTT_BROKER, MQTT_PORT, 60)
+        client.subscribe(MQTT_TOPIC)
+
+        # Start MQTT loop
+        print("Listening for frames...")
+        client.loop_forever()
+    except KeyboardInterrupt:
+        print("Exiting...")
+        client.disconnect()
+        cv2.destroyAllWindows()
+    except Exception as e:
+        print(f"MQTT Error: {e}")
+
+if __name__ == "__main__":
+    main()

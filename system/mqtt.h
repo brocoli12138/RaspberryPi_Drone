@@ -84,9 +84,16 @@ public:
     // token_ptr subscribe(const string& topicFilter, int qos) override;
     mqtt::delivery_token_ptr publish(std::vector<uint8_t> payload, int qos, bool retained = false)
     {
-        mqtt::binary_ref payload_ref(reinterpret_cast<const char *>(payload.data()), payload.size());
-        std::cout << "payloadlength: " << payload_ref.length() << std::endl;
-        return _publishTopic.publish(payload_ref, qos, retained);
+        if (payload.size() != 0)
+        {
+            mqtt::binary_ref payload_ref(reinterpret_cast<const char *>(payload.data()), payload.size());
+            // std::cout << "payloadlength: " << payload_ref.length() << std::endl;
+            return _publishTopic.publish(payload_ref, qos, retained);
+        }
+        else
+        {
+            return nullptr;
+        }
     };
     ~Mqttclient();
 };
