@@ -92,6 +92,7 @@
         "filesystem": "cpp",
         "csignal": "cpp",
         "variant": "cpp",
-        "bitset": "cpp"
+        "bitset": "cpp",
+        "codecvt": "cpp"
     }
 }
